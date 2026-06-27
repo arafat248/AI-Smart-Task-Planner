@@ -1,0 +1,84 @@
+# ==========================================
+# Python / Django
+# ==========================================
+
+# Virtual Environment
+backend/env/
+backend/venv/
+backend/.venv/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Database
+backend/db.sqlite3
+backend/*.sqlite3
+
+# Static & Media
+backend/staticfiles/
+backend/media/
+
+# Environment Variables
+backend/.env
+
+# Testing & Coverage
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# ==========================================
+# React / Vite
+# ==========================================
+
+# Dependencies
+frontend/node_modules/
+
+# Build Output
+frontend/dist/
+frontend/dist-ssr/
+
+# Environment Variables
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.production.local
+
+# Logs
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/pnpm-debug.log*
+frontend/lerna-debug.log*
+
+# ==========================================
+# IDE & Editor
+# ==========================================
+
+.vscode/
+!.vscode/extensions.json
+
+.idea/
+
+# ==========================================
+# Operating System
+# ==========================================
+
+.DS_Store
+Thumbs.db
+
+# ==========================================
+# General Logs
+# ==========================================
+
+*.log
+
+# ==========================================
+# Miscellaneous
+# ==========================================
+
+.env
+*.local
