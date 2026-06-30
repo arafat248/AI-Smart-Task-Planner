@@ -3,9 +3,8 @@ from datetime import timedelta
 import dj_database_url
 from decouple import config, Csv
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
-
-SECRET_KEY = config('SECRET_KEY')
+BASE_DIR = Path(__file__).resolve().parent.parent
+SECRET_KEY = config('SECRET_KEY', default='')
 DEBUG = config('DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost', cast=Csv())
 
@@ -17,7 +16,6 @@ DJANGO_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 ]
-
 THIRD_PARTY_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
@@ -28,17 +26,13 @@ THIRD_PARTY_APPS = [
     'django_celery_beat',
     'django_celery_results',
 ]
-
 LOCAL_APPS = [
     'apps.accounts.apps.AccountsConfig',
     'apps.tasks.apps.TasksConfig',
     'apps.planner.apps.PlannerConfig',
     'apps.notifications.apps.NotificationsConfig',
-    'apps.dashboard.apps.DashboardConfig',
-    'apps.calendar.apps.CalendarConfig',
-    'core',
+    'apps.deshboard.apps.DeshboardConfig',
 ]
-
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
@@ -77,7 +71,7 @@ TEMPLATES = [
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=config('DATABASE_URL'),
+        default=config('DATABASE_URL', default='sqlite:///' + str(BASE_DIR / 'db.sqlite3')),
         conn_max_age=600,
         conn_health_checks=True,
     )
@@ -126,6 +120,7 @@ SPECTACULAR_SETTINGS = {
     'SERVE_INCLUDE_SCHEMA': False,
     'COMPONENT_SPLIT_REQUEST': True,
 }
+
 CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='http://localhost:5173', cast=Csv())
 CORS_ALLOW_CREDENTIALS = True
 
@@ -184,7 +179,7 @@ LOGGING = {
         'console': {'class': 'logging.StreamHandler', 'formatter': 'json'},
         'file': {
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': BASE_DIR / 'logs' / 'django.log',
+            'filename': str(BASE_DIR / 'logs' / 'django.log'),
             'maxBytes': 10 * 1024 * 1024,
             'backupCount': 5,
             'formatter': 'json',
@@ -197,3 +192,39 @@ LOGGING = {
         'celery': {'handlers': ['console'], 'level': 'INFO', 'propagate': False},
     },
 }
+
+ENVIRONMENT = config('ENVIRONMENT', default='development')
+
+if ENVIRONMENT == 'development':
+    DEBUG = True
+    ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
+    INSTALLED_APPS += ['debug_toolbar', 'django_extensions']
+    MIDDLEWARE.insert(0, 'debug_toolbar.middleware.DebugToolbarMiddleware')
+    INTERNAL_IPS = ['127.0.0.1']
+    LOGGING['loggers']['django.db.backends']['level'] = 'DEBUG'
+    SIMPLE_JWT['ROTATE_REFRESH_TOKENS'] = False
+
+elif ENVIRONMENT == 'production':
+    DEBUG = False
+    ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='', cast=Csv())
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SENTRY_DSN = config('SENTRY_DSN', default='')
+    if SENTRY_DSN:
+        try:
+            import sentry_sdk  # type: ignore
+            from sentry_sdk.integrations.django import DjangoIntegration  # type: ignore
+
+            sentry_sdk.init(
+                dsn=SENTRY_DSN,
+                integrations=[DjangoIntegration()],
+                traces_sample_rate=0.1,
+                send_default_pii=False,
+            )
+        except Exception:
+            pass
+
