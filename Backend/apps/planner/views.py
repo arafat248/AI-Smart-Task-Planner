@@ -117,8 +117,6 @@ class PlannerViewSet(viewsets.ViewSet):
         plan.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    # ── Extra actions ─────────────────────────────────────────────────────────
-
     @extend_schema(
         tags=TAG,
         summary='Get the latest completed plan',
